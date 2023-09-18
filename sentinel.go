@@ -18,15 +18,17 @@ const (
 )
 
 type SentinelStat struct {
-	cfgPath string
-	config  *SentinelConfig
+	ConfigPath string
+	Config     *SentinelConfig
+	Masters    map[string]*SentinelInstance
 }
 
 func NewSentinelStat(cfgPath string) *SentinelStat {
 	s := new(SentinelStat)
-	s.cfgPath = cfgPath
-	s.config = new(SentinelConfig)
-	s.config.Port = SentinelPort
+	s.ConfigPath = cfgPath
+	s.Config = new(SentinelConfig)
+	s.Config.Port = SentinelPort
+	s.Masters = make(map[string]*SentinelInstance)
 
 	err := s.ParseConfig()
 	if err != nil {
@@ -37,16 +39,37 @@ func NewSentinelStat(cfgPath string) *SentinelStat {
 }
 
 type SentinelAddr struct {
+	Host string
+	IP   string
+	Port int
+}
+
+func NewSentinelAddr(host string, port int) *SentinelAddr {
+	sa := new(SentinelAddr)
+
+	// TODO solve hostname
+
+	sa.Host = host
+	sa.IP = host
+	sa.Port = port
+
+	return sa
 }
 
 type SentinelInstance struct {
 	flags SIFlags
 	name  string
-	addr  SentinelAddr
+	addr  *SentinelAddr
+
+	quorum int
 }
 
 func NewSentinelInstance(name string, flags SIFlags, host string, port int, quorum int, master *SentinelInstance) *SentinelInstance {
 	inst := new(SentinelInstance)
+	inst.flags = flags
+	inst.name = name
+	inst.addr = NewSentinelAddr(host, port)
+	inst.quorum = quorum
 
 	return inst
 }
@@ -57,13 +80,13 @@ func (s *SentinelStat) Run() {
 
 func (s *SentinelStat) ParseConfig() error {
 	v := viper.New()
-	v.SetConfigFile(s.cfgPath)
+	v.SetConfigFile(s.ConfigPath)
 	err := v.ReadInConfig()
 	if err != nil {
 		return err
 	}
 
-	err = v.Unmarshal(&s.config)
+	err = v.Unmarshal(&s.Config)
 	if err != nil {
 		return err
 	}
@@ -73,15 +96,15 @@ func (s *SentinelStat) ParseConfig() error {
 
 func (s *SentinelStat) HandleConfiguration() error {
 	/* monitor <name> <host> <port> <quorum> */
-	if s.config.Monitor.Quorum <= 0 {
+	if s.Config.Monitor.Quorum <= 0 {
 		return errors.New("quorum must be 1 or greater")
 	}
 	Instance = NewSentinelInstance(
-		s.config.Monitor.Name,
+		s.Config.Monitor.Name,
 		SIMaster,
-		s.config.Monitor.IP,
-		s.config.Monitor.Port,
-		s.config.Monitor.Quorum,
+		s.Config.Monitor.Host,
+		s.Config.Monitor.Port,
+		s.Config.Monitor.Quorum,
 		nil,
 	)
 

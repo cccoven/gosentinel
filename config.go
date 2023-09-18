@@ -2,7 +2,7 @@ package main
 
 type MonitorConfig struct {
 	Name   string `yaml:"name"`
-	IP     string `yaml:"ip"`
+	Host   string `yaml:"host"`
 	Port   int    `yaml:"port"`
 	Quorum int    `yaml:"quorum"`
 }

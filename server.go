@@ -22,7 +22,7 @@ func main() {
 		log.Fatal("failed to load sentinel configuration: ", err.Error())
 	}
 
-	fmt.Println(Sentinel.config)
-	
+	fmt.Println(Sentinel.Config)
+
 	Sentinel.Run()
 }
