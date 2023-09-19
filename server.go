@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 )
@@ -21,8 +20,6 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to load sentinel configuration: ", err.Error())
 	}
-
-	fmt.Println(Sentinel.Config)
 
 	Sentinel.Run()
 }
