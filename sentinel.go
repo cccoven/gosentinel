@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/spf13/viper"
 	"log"
+	"net"
 )
 
 type SIFlags uint
@@ -47,10 +48,9 @@ type SentinelAddr struct {
 func NewSentinelAddr(host string, port int) *SentinelAddr {
 	sa := new(SentinelAddr)
 
-	// TODO solve hostname
-
+	addrs, _ := net.LookupHost(host)
 	sa.Host = host
-	sa.IP = host
+	sa.IP = addrs[0]
 	sa.Port = port
 
 	return sa

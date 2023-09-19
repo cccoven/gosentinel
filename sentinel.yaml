@@ -1,8 +1,6 @@
 port: 26379
 
-dir: "/private/tmp"
-
-monitor: 
+monitor:
   name: mymaster 
   host: 127.0.0.1 
   port: 6379 
